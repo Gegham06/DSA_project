@@ -38,8 +38,7 @@ int current_capacity(Vector *vector){
 }
 
 int isFull(Vector *vector){
-    if (vector->size == vector->capacity) return 1;
-    return -1;
+    return (vector->size == vector->capacity) ? 1 : 0;
 }
 
 int add_at_end(Vector *vector, int value){
@@ -50,7 +49,7 @@ int add_at_end(Vector *vector, int value){
     }
     
     vector->collection[vector->size] = value;
-    new_vector->size++;
+    vector->size++;
     return 1;
 }
 
@@ -84,17 +83,29 @@ int get_value_at_index(Vector *vector, int index){
 }
 
 Vector *set_at_index(Vector *vector, int index, int value){
-    if (vector == NULL) return -1;
+    Vector *set_at_index(Vector *vector, int index, int value) {
+    if (vector == NULL || index < 0) return NULL;
 
-    if (isFull(vector) == 1){
-        Vector *vector = resize_auto(vector);
-    }
-    int temp_vector_size = vector->size;
-    while (temp_vector_size != index - 1){
-        vector->collection[temp_vector_size + 1] = vector->collection[temp_vector_size];
-        temp_vector_size--; 
+    while (index >= vector->capacity) {
+        if (resize_auto(&vector) == -1) return NULL;
     }
 
-    vector->collection[index] = value;
-    return vector->collection[index];
+    if (index < vector->size) {
+        for (int i = vector->size; i > index; i--) { // shifts elements to the right
+            vector->collection[i] = vector->collection[i - 1];
+        }
+        vector->collection[index] = value;
+        vector->size++;
+    } 
+    else { // index >= vector->size, fill gaps with 0 if needed
+        for (int i = vector->size; i < index; i++) {
+            vector->collection[i] = 0;
+        }
+        vector->collection[index] = value;
+        vector->size = index + 1;
+    }
+
+    return vector;
+}
+
 }

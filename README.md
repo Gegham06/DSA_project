@@ -34,3 +34,34 @@ A command-line program that reads an unknown number of integers from the user, s
 Of course\! Here are two additional project ideas focusing on the stack and queue data structures, following the same format.
 
 -----
+
+### 2\. `C-HashMap`: A Hash Map Library
+
+# Project Title: `C-HashMap` - A Key-Value Hash Map Library
+
+## Overview
+
+Many modern languages have built-in dictionaries or hash maps. This project involves building a hash map in C to store key-value pairs. Your library should handle string keys and `void*` values, allowing it to store any type of data. It must efficiently handle hash collisions.
+
+## Core Features
+
+  - Create and destroy a hash map.
+  - Insert a key-value pair.
+  - Retrieve a value given a key.
+  - Delete a key-value pair.
+  - Check if a key exists.
+  - Implement a string hashing function (e.g., djb2).
+  - Handle collisions using **chaining** (linked lists at each bucket).
+
+## Demo Application Idea
+
+A word frequency counter. The demo program should read a text file, use the `C-HashMap` library to store each unique word as a key and its frequency count as the value, and then print the results.
+
+## Key Learning Concepts
+
+  - **Hashing**: Designing hash functions and handling collisions.
+  - **Data Structures**: Combining arrays and linked lists.
+  - **Pointer Management**: Managing memory for keys, values, and nodes.
+  - **API Encapsulation**: Hiding implementation details from the user.
+
+-----
