@@ -100,3 +100,32 @@ The user can add, remove, or search contacts, and print the contact list alphabe
 * **Ordered Data**: Using trees to maintain sorted data efficiently.
 
 ----
+### 4\. `C-Graph`: A Graph Algorithms Toolkit
+
+# Project Title: `C-Graph` - A Graph Data Structure and Algorithms Library
+
+## Overview
+
+This project packages fundamental graph algorithms into a reusable C library. The library should provide a single, clean interface for creating graphs, adding nodes and edges, and running classic algorithms like BFS, DFS, and Dijkstra's.
+
+## Core Features
+
+  - Define a graph data structure (using an **adjacency list** is recommended).
+  - Functions to create directed or undirected graphs.
+  - Functions to add/remove vertices and edges (both weighted and unweighted).
+  - An implementation of **Breadth-First Search (BFS)** that returns the path.
+  - An implementation of **Depth-First Search (DFS)**.
+  - An implementation of **Dijkstra's algorithm** to find the shortest path in a weighted graph.
+
+## Demo Application Idea
+
+A simple pathfinding program. The demo could define a small city map as a graph (intersections are vertices, roads are edges with travel times as weights) and find the fastest route between two points using Dijkstra's algorithm.
+
+## Key Learning Concepts
+
+  - **Graph Representations**: Adjacency lists vs. matrices.
+  - **Algorithm Implementation**: Translating textbook algorithms into clean code.
+  - **Data Encapsulation**: Hiding the graph's internal structure behind an API.
+  - **Modular Design**: Separating the data structure from the algorithms that operate on it.
+
+-----
