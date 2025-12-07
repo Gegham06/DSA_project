@@ -1,0 +1,9 @@
+services:
+  dev:
+    build: .
+    container_name: DSA_PROJECT
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true

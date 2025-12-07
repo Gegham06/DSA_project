@@ -1,7 +1,7 @@
 #ifndef C_GRAPH_INTERNAL_H
 #define C_GRAPH_INTERNAL_H
 
-#include "../include/c_graph.h"
+#include "c_graph.h"
 
 // Internal data structures
 typedef struct c_graph_edge_t {

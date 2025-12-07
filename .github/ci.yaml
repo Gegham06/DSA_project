@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: docker compose build
+    
+    - name: Configure CMake
+      run: docker compose run --rm dev cmake -S . -B build
+    
+    - name: Build project
+      run: docker compose run --rm dev cmake --build build
+    
+    - name: Run tests
+      run: docker compose run --rm dev ctest --test-dir build --output-on-failure
+    
+    - name: Check code formatting
+      run: |
+        docker compose run --rm dev clang-format -i src/*.c include/*.h tests/*.c
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "Code is not properly formatted!"
+          echo "Run: docker compose run --rm dev clang-format -i src/*.c include/*.h tests/*.c"
+          git diff
+          exit 1
+        fi
