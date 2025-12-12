@@ -1,5 +1,5 @@
 // test_vector.c
-#include "c_vector.h"
+#include "vector/c_vector.h"
 #include <stdio.h>
 
 int main() {

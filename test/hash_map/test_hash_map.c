@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "c_hash_map.h"
+#include "hash_map/c_hash_map.h"
 
 // Test 1: Basic creation and destruction
 void test_create_destroy() {

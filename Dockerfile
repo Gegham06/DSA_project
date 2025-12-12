@@ -19,7 +19,16 @@ ENV CC=clang
 ENV CXX=clang++
 
 # Create working directory
-WORKDIR /workspace
+WORKDIR /app
 
-# Default command
-CMD ["/bin/bash"]
+# Copy the source code
+COPY . .
+
+# Build the project
+RUN mkdir -p build && \
+    cd build && \
+    cmake .. && \
+    make
+
+# Run the tests
+CMD ["make", "-C", "build", "test_runner"]

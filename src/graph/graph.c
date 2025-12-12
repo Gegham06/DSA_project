@@ -1,6 +1,20 @@
 #include "c_graph_internal.h"
 #include <stdlib.h>
 
+static c_graph_vertex_t* find_vertex(c_graph_t* graph, int id);
+static int remove_edge_from_vertex(c_graph_vertex_t* vertex, int dest_id);
+
+static c_graph_vertex_t* find_vertex(c_graph_t* graph, int id) {
+    c_graph_vertex_t* current = graph->vertices;
+    while (current) {
+        if (current->id == id) {
+            return current;
+        }
+        current = current->next;
+    }
+    return NULL;
+}
+
 c_graph_t* graph_create(int directed) {
     c_graph_t* graph = (c_graph_t*)malloc(sizeof(c_graph_t));
     if (graph) {
@@ -11,15 +25,8 @@ c_graph_t* graph_create(int directed) {
 }
 
 int graph_add_vertex(c_graph_t* graph, int id) {
-    if (!graph) return -1;
-
-    // Check for existing vertex
-    c_graph_vertex_t* current = graph->vertices;
-    while(current) {
-        if (current->id == id) {
-            return -1; // Vertex already exists
-        }
-        current = current->next;
+    if (!graph || find_vertex(graph, id)) {
+        return -1; // Graph is null or vertex already exists
     }
 
     c_graph_vertex_t* new_vertex = (c_graph_vertex_t*)malloc(sizeof(c_graph_vertex_t));
@@ -36,52 +43,46 @@ int graph_add_vertex(c_graph_t* graph, int id) {
 int graph_remove_vertex(c_graph_t* graph, int id) {
     if (!graph) return -1;
 
-    c_graph_vertex_t* prev_vertex = NULL;
-    c_graph_vertex_t* curr_vertex = graph->vertices;
-    while(curr_vertex && curr_vertex->id != id) {
-        prev_vertex = curr_vertex;
-        curr_vertex = curr_vertex->next;
-    }
+    c_graph_vertex_t* vertex_to_remove = find_vertex(graph, id);
+    if (!vertex_to_remove) return -1;
 
-    if (!curr_vertex) return -1; // Vertex not found
-
-    if (prev_vertex) {
-        prev_vertex->next = curr_vertex->next;
+    // Remove the vertex from the list
+    if (graph->vertices == vertex_to_remove) {
+        graph->vertices = vertex_to_remove->next;
     } else {
-        graph->vertices = curr_vertex->next;
+        c_graph_vertex_t* current = graph->vertices;
+        while (current->next && current->next != vertex_to_remove) {
+            current = current->next;
+        }
+        if (current->next) {
+            current->next = vertex_to_remove->next;
+        }
     }
 
     // Free edges of the removed vertex
-    c_graph_edge_t* edge = curr_vertex->edges;
-    while(edge) {
+    c_graph_edge_t* edge = vertex_to_remove->edges;
+    while (edge) {
         c_graph_edge_t* temp = edge;
         edge = edge->next;
         free(temp);
     }
-    free(curr_vertex);
+    free(vertex_to_remove);
 
     // Remove all edges pointing to the deleted vertex
     c_graph_vertex_t* temp_vertex = graph->vertices;
-    while(temp_vertex) {
-        graph_remove_edge(graph, temp_vertex->id, id);
+    while (temp_vertex) {
+        remove_edge_from_vertex(temp_vertex, id);
         temp_vertex = temp_vertex->next;
     }
 
     return 0;
 }
 
-int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
-    if (!graph) return -1;
-
-    c_graph_vertex_t* src_vertex = graph->vertices;
-    while(src_vertex && src_vertex->id != src_id) {
-        src_vertex = src_vertex->next;
-    }
-
-    if (!src_vertex) return -1;
+static int remove_edge_from_vertex(c_graph_vertex_t* vertex, int dest_id) {
+    if (!vertex) return -1;
 
     c_graph_edge_t* prev_edge = NULL;
-    c_graph_edge_t* curr_edge = src_vertex->edges;
+    c_graph_edge_t* curr_edge = vertex->edges;
     while (curr_edge && curr_edge->dest_id != dest_id) {
         prev_edge = curr_edge;
         curr_edge = curr_edge->next;
@@ -91,34 +92,30 @@ int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
         if (prev_edge) {
             prev_edge->next = curr_edge->next;
         } else {
-            src_vertex->edges = curr_edge->next;
+            vertex->edges = curr_edge->next;
         }
         free(curr_edge);
+        return 0;
     }
+    return -1; // Edge not found
+}
+
+int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
+    if (!graph) return -1;
+
+    c_graph_vertex_t* src_vertex = find_vertex(graph, src_id);
+    if (!src_vertex) return -1;
+
+    int result = remove_edge_from_vertex(src_vertex, dest_id);
 
     if (!graph->directed) {
-        c_graph_vertex_t* dest_vertex = graph->vertices;
-        while(dest_vertex && dest_vertex->id != dest_id) {
-            dest_vertex = dest_vertex->next;
-        }
+        c_graph_vertex_t* dest_vertex = find_vertex(graph, dest_id);
         if (dest_vertex) {
-            prev_edge = NULL;
-            curr_edge = dest_vertex->edges;
-            while (curr_edge && curr_edge->dest_id != src_id) {
-                prev_edge = curr_edge;
-                curr_edge = curr_edge->next;
-            }
-            if (curr_edge) {
-                if (prev_edge) {
-                    prev_edge->next = curr_edge->next;
-                } else {
-                    dest_vertex->edges = curr_edge->next;
-                }
-                free(curr_edge);
-            }
+            remove_edge_from_vertex(dest_vertex, src_id);
         }
     }
-    return 0;
+
+    return result;
 }
 
 void graph_destroy(c_graph_t* graph) {
@@ -142,15 +139,8 @@ void graph_destroy(c_graph_t* graph) {
 int graph_add_edge(c_graph_t* graph, int src_id, int dest_id, double weight) {
     if (!graph) return -1;
 
-    c_graph_vertex_t* src_vertex = NULL;
-    c_graph_vertex_t* dest_vertex = NULL;
-    c_graph_vertex_t* current = graph->vertices;
-
-    while (current) {
-        if (current->id == src_id) src_vertex = current;
-        if (current->id == dest_id) dest_vertex = current;
-        current = current->next;
-    }
+    c_graph_vertex_t* src_vertex = find_vertex(graph, src_id);
+    c_graph_vertex_t* dest_vertex = find_vertex(graph, dest_id);
 
     if (!src_vertex || !dest_vertex) return -1;
 
@@ -164,7 +154,12 @@ int graph_add_edge(c_graph_t* graph, int src_id, int dest_id, double weight) {
 
     if (!graph->directed) {
         c_graph_edge_t* new_edge_back = (c_graph_edge_t*)malloc(sizeof(c_graph_edge_t));
-        if (!new_edge_back) return -1;
+        if (!new_edge_back) {
+            // Clean up the forward edge if the reverse edge allocation fails
+            src_vertex->edges = new_edge->next;
+            free(new_edge);
+            return -1;
+        }
         new_edge_back->dest_id = src_id;
         new_edge_back->weight = weight;
         new_edge_back->next = dest_vertex->edges;

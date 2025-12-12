@@ -1,10 +1,8 @@
-#include "binary_search_tree.h"
+#include "bst/binary_search_tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 Node *create_node(int value){
-    if (value == NULL) return NULL;
-
     Node *node = malloc(sizeof(Node));
 
     if (node == NULL) return NULL;
@@ -25,10 +23,10 @@ void destroy_binary_search_tree(Node *root){
 }
 
 Node *binary_insert(Node *root, int value){
-    if (root == NULL && value != NULL){
+    if (root == NULL){
         Node *new_node = create_node(value);
 
-        if (new_node == NULL) return NULL; // free(new_node) should i write it or not?
+        if (new_node == NULL) return NULL;
 
         return new_node;
     }
@@ -93,11 +91,11 @@ Node *binary_search_recursive(Node *root, int target){
 int delete_node(Node **root, int target){
     if (*root == NULL) return 0;
 
-    if (target < *(root)->value){
-        return delete_node(&(*root)->left, value);
+    if (target < (*root)->value){
+        return delete_node(&(*root)->left, target);
     }
-    else if (target > *(root)->value){
-        return delete(&(*root)->right, value);
+    else if (target > (*root)->value){
+        return delete_node(&(*root)->right, target);
     }
     else{
         Node *temp_node = *root;
@@ -108,21 +106,21 @@ int delete_node(Node **root, int target){
         }
         else if ((*root)->left == NULL) { // has only one child which is on the right side
             *root = (*root)->right;
-            free(temp);
+            free(temp_node);
         }
         else if ((*root)->right == NULL) { // left side child
             *root = (*root)->left;
-            free(temp);
+            free(temp_node);
         }
         else { //has two children, removing parent and replacing it with his child(greatest)
             Node *min_node_right_child = (*root)->right;
 
             while (min_node_right_child->left){
-                min_node_right_child = minRight->left;
+                min_node_right_child = min_node_right_child->left;
             }
 
             (*root)->value = min_node_right_child->value;
-            delete(&(*root)->right, min_node_right_child->value);
+            delete_node(&(*root)->right, min_node_right_child->value);
         }
     return 1;
     }

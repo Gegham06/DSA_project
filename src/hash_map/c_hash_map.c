@@ -1,4 +1,4 @@
-#include "c_hash_map.h"
+#include "hash_map/c_hash_map.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -73,7 +73,7 @@ int hash_map_insert(HashMap *map, const char *key, const char *value){
         free(node);
         return -1;
     }
-    // node->next = map->buckets[index];
+    node->next = map->buckets[index];
     map->buckets[index] = node;
     return 0;
 }
