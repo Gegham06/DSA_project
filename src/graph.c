@@ -1,19 +1,38 @@
 #include "include/c_graph_internal.h"
 #include <stdlib.h>
 
+/*
+ * Function: graph_create
+ * ----------------------
+ * Allocates and initializes a new graph structure.
+ *
+ * directed: 1 for directed graph, 0 for undirected graph
+ *
+ * returns: pointer to the created graph, or NULL if allocation fails
+ */
 c_graph_t* graph_create(int directed) {
     c_graph_t* graph = (c_graph_t*)malloc(sizeof(c_graph_t));
     if (graph) {
         graph->directed = directed;
-        graph->vertices = NULL;
+        graph->vertices = NULL;  // Initialize vertex list as empty
     }
     return graph;
 }
 
+/*
+ * Function: graph_add_vertex
+ * --------------------------
+ * Adds a new vertex with the specified ID to the graph.
+ *
+ * graph: pointer to the graph structure
+ * id: unique identifier for the new vertex
+ *
+ * returns: 0 if successful, -1 if vertex already exists or graph is NULL
+ */
 int graph_add_vertex(c_graph_t* graph, int id) {
     if (!graph) return -1;
 
-    // Check for existing vertex
+    // Check for existing vertex with same ID
     c_graph_vertex_t* current = graph->vertices;
     while(current) {
         if (current->id == id) {
@@ -22,17 +41,28 @@ int graph_add_vertex(c_graph_t* graph, int id) {
         current = current->next;
     }
 
+    // Allocate memory for new vertex
     c_graph_vertex_t* new_vertex = (c_graph_vertex_t*)malloc(sizeof(c_graph_vertex_t));
     if (!new_vertex) return -1;
 
     new_vertex->id = id;
-    new_vertex->edges = NULL;
-    new_vertex->next = graph->vertices;
+    new_vertex->edges = NULL;  // Initialize edge list as empty
+    new_vertex->next = graph->vertices;  // Insert at the beginning
     graph->vertices = new_vertex;
 
     return 0;
 }
 
+/*
+ * Function: graph_remove_vertex
+ * -----------------------------
+ * Removes the vertex with the specified ID and all associated edges.
+ *
+ * graph: pointer to the graph structure
+ * id: ID of the vertex to remove
+ *
+ * returns: 0 if successful, -1 if vertex not found or graph is NULL
+ */
 int graph_remove_vertex(c_graph_t* graph, int id) {
     if (!graph) return -1;
 
@@ -45,13 +75,14 @@ int graph_remove_vertex(c_graph_t* graph, int id) {
 
     if (!curr_vertex) return -1; // Vertex not found
 
+    // Remove vertex from linked list
     if (prev_vertex) {
         prev_vertex->next = curr_vertex->next;
     } else {
         graph->vertices = curr_vertex->next;
     }
 
-    // Free edges of the removed vertex
+    // Free all edges of the removed vertex
     c_graph_edge_t* edge = curr_vertex->edges;
     while(edge) {
         c_graph_edge_t* temp = edge;
@@ -70,23 +101,34 @@ int graph_remove_vertex(c_graph_t* graph, int id) {
     return 0;
 }
 
+/*
+ * Function: graph_remove_edge
+ * ---------------------------
+ * Removes the edge from src_id to dest_id. For undirected graphs, also removes the reverse edge.
+ *
+ * graph: pointer to the graph structure
+ * src_id: source vertex ID
+ * dest_id: destination vertex ID
+ *
+ * returns: 0 if successful, -1 if source or destination vertex not found
+ */
 int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
     if (!graph) return -1;
 
+    // Find source vertex
     c_graph_vertex_t* src_vertex = graph->vertices;
     while(src_vertex && src_vertex->id != src_id) {
         src_vertex = src_vertex->next;
     }
-
     if (!src_vertex) return -1;
 
+    // Remove edge from source to destination
     c_graph_edge_t* prev_edge = NULL;
     c_graph_edge_t* curr_edge = src_vertex->edges;
     while (curr_edge && curr_edge->dest_id != dest_id) {
         prev_edge = curr_edge;
         curr_edge = curr_edge->next;
     }
-
     if (curr_edge) {
         if (prev_edge) {
             prev_edge->next = curr_edge->next;
@@ -96,6 +138,7 @@ int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
         free(curr_edge);
     }
 
+    // If undirected, remove reverse edge
     if (!graph->directed) {
         c_graph_vertex_t* dest_vertex = graph->vertices;
         while(dest_vertex && dest_vertex->id != dest_id) {
@@ -118,9 +161,19 @@ int graph_remove_edge(c_graph_t* graph, int src_id, int dest_id) {
             }
         }
     }
+
     return 0;
 }
 
+/*
+ * Function: graph_destroy
+ * -----------------------
+ * Frees all memory allocated for the graph, including vertices and edges.
+ *
+ * graph: pointer to the graph structure
+ *
+ * returns: void
+ */
 void graph_destroy(c_graph_t* graph) {
     if (!graph) return;
 
@@ -139,6 +192,19 @@ void graph_destroy(c_graph_t* graph) {
     free(graph);
 }
 
+/*
+ * Function: graph_add_edge
+ * ------------------------
+ * Adds an edge from src_id to dest_id with a given weight.
+ * For undirected graphs, also adds the reverse edge.
+ *
+ * graph: pointer to the graph structure
+ * src_id: source vertex ID
+ * dest_id: destination vertex ID
+ * weight: weight of the edge
+ *
+ * returns: 0 if successful, -1 if vertices not found or allocation fails
+ */
 int graph_add_edge(c_graph_t* graph, int src_id, int dest_id, double weight) {
     if (!graph) return -1;
 
@@ -146,22 +212,23 @@ int graph_add_edge(c_graph_t* graph, int src_id, int dest_id, double weight) {
     c_graph_vertex_t* dest_vertex = NULL;
     c_graph_vertex_t* current = graph->vertices;
 
+    // Find source and destination vertices
     while (current) {
         if (current->id == src_id) src_vertex = current;
         if (current->id == dest_id) dest_vertex = current;
         current = current->next;
     }
-
     if (!src_vertex || !dest_vertex) return -1;
 
+    // Add edge from source to destination
     c_graph_edge_t* new_edge = (c_graph_edge_t*)malloc(sizeof(c_graph_edge_t));
     if (!new_edge) return -1;
-
     new_edge->dest_id = dest_id;
     new_edge->weight = weight;
     new_edge->next = src_vertex->edges;
     src_vertex->edges = new_edge;
 
+    // If undirected, add reverse edge
     if (!graph->directed) {
         c_graph_edge_t* new_edge_back = (c_graph_edge_t*)malloc(sizeof(c_graph_edge_t));
         if (!new_edge_back) return -1;
