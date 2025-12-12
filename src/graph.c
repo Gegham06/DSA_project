@@ -1,4 +1,5 @@
-#include "include/c_graph_internal.h"
+#include "c_graph_internal.h"
+#include "c_graph.h"
 #include <stdlib.h>
 
 /*

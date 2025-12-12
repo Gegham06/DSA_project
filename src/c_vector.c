@@ -1,4 +1,3 @@
-#include "include/c_vector.h"
 #include "c_vector.h"
 #include <stdio.h>
 #include <stdlib.h>
