@@ -80,11 +80,6 @@ This project implements a **simple, unbalanced BST** in C — ideal for learning
 * Create and destroy a BST.
 * Insert, search, and delete keys.
 * Optional support for storing **key-value pairs** (like a map).
-* Traversal functions:
-
-  * **Inorder** (sorted order)
-  * **Preorder**
-  * **Postorder**
 * Optional recursive or iterative implementations.
 
 ## Demo Application Idea
