@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "c_vector.h"
+#include "include/c_vector.h"
 
 int main() {
     printf("=== Basic Vector Example ===\n");

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "c_hash_map.h"
+#include "include/c_hash_map.h"
 
 // Helper function to print bucket information
 void print_bucket_stats(HashMap *map) {

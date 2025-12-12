@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "c_hash_map.h"
+#include "include/c_hash_map.h"
 
 #define NUM_OPERATIONS 10000
 #define KEY_LENGTH 10

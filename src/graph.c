@@ -1,4 +1,4 @@
-#include "c_graph_internal.h"
+#include "include/c_graph_internal.h"
 #include <stdlib.h>
 
 c_graph_t* graph_create(int directed) {
